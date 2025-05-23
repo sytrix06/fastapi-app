@@ -1,0 +1,27 @@
+[
+  {
+    "username": "rakso",
+    "key": "TRG-raks-CQGB-JPVQ",
+    "hwid": "8d33a9-22d9ce-7cfa55-306fee-f5cd4f-5ef09f-1422df-908f80-93959d-d515c5-f70d",
+    "created_at": "2025-05-23 20:31:27",
+    "hwid_hash": "8a9d5b3c74264481b3e053e61732924d8beb0ff06517ce96ef9bf6b27a410581"
+  },
+  {
+    "username": "sukxs",
+    "key": "TRG-sukx-L264-66NU",
+    "hwid": "",
+    "created_at": "2025-05-23 23:30:46"
+  },
+  {
+    "username": "racso",
+    "key": "TRG-racs-F9LU-VDG3",
+    "hwid": "",
+    "created_at": "2025-05-23 23:38:30"
+  },
+  {
+    "username": "emre",
+    "key": "TRG-emre-SVXR-5KYS",
+    "hwid": "",
+    "created_at": "2025-05-24 00:27:59"
+  }
+]

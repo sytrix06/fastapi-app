@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Trigger Key System</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class='bx bx-target-lock'></i>
+                    <span>Trigger</span>
+                </div>
+                <button class="collapse-btn" id="collapseBtn">
+                    <i class='bx bx-menu'></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <img src="https://ui-avatars.com/api/?name=User&background=7494ec&color=fff" alt="User">
+                </div>
+                <div class="user-info">
+                    <span class="user-name">Username</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-page="dashboard">
+                        <a href="#">
+                            <i class='bx bxs-dashboard'></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="download">
+                        <a href="#">
+                            <i class='bx bxs-download'></i>
+                            <span>Trigger Download</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="generator">
+                        <a href="#">
+                            <i class='bx bxs-key'></i>
+                            <span>Key Generator</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="users">
+                        <a href="#">
+                            <i class='bx bxs-user'></i>
+                            <span>Users & Keys</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="settings">
+                        <a href="#">
+                            <i class='bx bxs-cog'></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="admin" id="adminNavItem">
+                        <a href="#">
+                            <i class='bx bxs-shield'></i>
+                            <span>Admin-Bereich</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="nav-footer">
+                    <button id="logoutBtn" class="logout-btn">
+                        <i class='bx bx-log-out'></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="topbar-actions">
+                    <div class="notification-icon">
+                        <i class='bx bx-bell'></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-dropdown">
+                        <img src="https://ui-avatars.com/api/?name=User&background=7494ec&color=fff" alt="User">
+                        <span class="username">Username</span>
+                        <i class='bx bx-chevron-down'></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="content-container">
+                <!-- Dashboard Page -->
+                <div class="page-content active" id="dashboard-page">
+                    <div class="welcome-card">
+                        <div class="welcome-text">
+                            <h2>Willkommen, <span class="username">Username</span> 👋</h2>
+                            <p>Willkommen in deinem Trigger Key Dashboard</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-cards">
+                        <div class="card">
+                            <div class="card-icon">
+                                <i class='bx bxs-key'></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Generierte Keys</h3>
+                                <p class="count" id="keyCount">0</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-icon">
+                                <i class='bx bxs-user'></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Registrierte User</h3>
+                                <p class="count" id="userCount">0</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-icon">
+                                <i class='bx bxs-download'></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Downloads</h3>
+                                <p class="count" id="downloadCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recent-keys">
+                        <div class="section-header">
+                            <h2>Kürzlich generierte Keys</h2>
+                            <button class="view-all-btn" data-page="users">Alle anzeigen</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Key</th>
+                                        <th>HWID</th>
+                                        <th>Erstellt am</th>
+                                        <th>Läuft ab</th>
+                                        <th>Aktion</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentKeysTable">
+                                    <!-- Wird durch JavaScript gefüllt -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Download Page -->
+                <div class="page-content" id="download-page">
+                    <div class="section-header">
+                        <h2>Trigger Download</h2>
+                    </div>
+                    
+                    <div class="download-container">
+                        <div class="download-card">
+                            <div class="download-icon">
+                                <i class='bx bxs-file'></i>
+                            </div>
+                            <div class="download-info">
+                                <h3>Trigger Application</h3>
+                                <p>Version 1.0.0</p>
+                                <ul class="feature-list">
+                                    <li><i class='bx bx-check'></i> Pixel Detection Trigger</li>
+                                    <li><i class='bx bx-check'></i> Customizable Settings</li>
+                                    <li><i class='bx bx-check'></i> Key Authentication</li>
+                                    <li><i class='bx bx-check'></i> Auto-Updates</li>
+                                </ul>
+                                <button class="download-btn" id="downloadTriggerBtn">
+                                    <i class='bx bxs-download'></i>
+                                    Trigger herunterladen
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="download-instructions">
+                            <h3>Installationsanleitung</h3>
+                            <ol>
+                                <li>Lade die Trigger-Anwendung herunter</li>
+                                <li>Führe die heruntergeladene .exe-Datei aus</li>
+                                <li>Gib deinen gültigen Key ein, wenn du dazu aufgefordert wirst</li>
+                                <li>Folge den Anweisungen auf dem Bildschirm, um die Installation abzuschließen</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Key Generator Page -->
+                <div class="page-content" id="generator-page">
+                    <div class="section-header">
+                        <h2>Key Generator</h2>
+                    </div>
+                    
+                    <div class="generator-container">
+                        <div class="generator-card">
+                            <h3>Generate New License Key</h3>
+                            <form id="keyGeneratorForm" class="key-form">
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" required placeholder="Enter username">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="validityDays">Validity Period</label>
+                                    <select id="validityDays" required>
+                                        <option value="1">1 Day</option>
+                                        <option value="7">7 Days</option>
+                                        <option value="30" selected>30 Days</option>
+                                        <option value="90">90 Days</option>
+                                        <option value="365">1 Year</option>
+                                        <option value="-1">Never Expire</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="generate-btn">
+                                    <i class='bx bxs-key'></i>
+                                    Generate Key
+                                </button>
+                            </form>
+                            
+                            <div id="generatedKeyContainer" class="generated-key-container" style="display: none;">
+                                <h4>Generated License Key</h4>
+                                <div class="key-display">
+                                    <input type="text" id="generatedKey" readonly>
+                                    <button class="copy-btn" onclick="copyToClipboard('generatedKey')">
+                                        <i class='bx bx-copy'></i>
+                                    </button>
+                                </div>
+                                <p class="key-info">This key is now registered in the system and ready to use.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="recent-keys">
+                            <h3>Recently Generated Keys</h3>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Key</th>
+                                            <th>HWID</th>
+                                            <th>Created</th>
+                                            <th>Expires</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentGeneratedKeys">
+                                        <!-- Filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users & Keys Page -->
+                <div class="page-content" id="users-page">
+                    <div class="section-header">
+                        <h2>Users & Keys Übersicht</h2>
+                    </div>
+                    
+                    <div class="search-filter-container">
+                        <div class="search-box">
+                            <i class='bx bx-search'></i>
+                            <input type="text" id="searchKeys" placeholder="Suche nach Username, Email oder Key...">
+                        </div>
+                        
+                        <div class="filter-options">
+                            <select id="keyFilter">
+                                <option value="all">Alle anzeigen</option>
+                                <option value="username">Nach Username</option>
+                                <option value="email">Nach Email</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Key</th>
+                                    <th>HWID</th>
+                                    <th>Erstellt am</th>
+                                    <th>Läuft ab</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keysTable">
+                                <!-- Wird durch JavaScript gefüllt -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Settings Page -->
+                <div class="page-content" id="settings-page">
+                    <div class="section-header">
+                        <h2>Einstellungen</h2>
+                    </div>
+                    
+                    <div class="settings-container">
+                        <div class="settings-card">
+                            <h3>Profil Einstellungen</h3>
+                            <form id="profileSettingsForm" class="settings-form">
+                                <div class="form-group">
+                                    <label for="profileUsername">Username</label>
+                                    <input type="text" id="profileUsername">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profileEmail">E-Mail</label>
+                                    <input type="email" id="profileEmail">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profilePassword">Neues Passwort</label>
+                                    <input type="password" id="profilePassword" placeholder="Leer lassen, um nicht zu ändern">
+                                </div>
+                                
+                                <button type="submit" class="save-btn">
+                                    <i class='bx bx-save'></i>
+                                    Einstellungen speichern
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3>App Einstellungen</h3>
+                            <div class="settings-option">
+                                <span>Dark Mode</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="darkModeToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-option">
+                                <span>Benachrichtigungen</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="notificationsToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-option">
+                                <span>Auto-Logout nach Inaktivität</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="autoLogoutToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Admin Page -->
+                <div class="page-content" id="admin-page">
+                    <div class="section-header">
+                        <h2>Admin-Verwaltung</h2>
+                    </div>
+                    
+                    <div class="admin-tabs">
+                        <button class="tab-btn active" data-tab="users-tab">Benutzer</button>
+                        <button class="tab-btn" data-tab="keys-tab">Keys</button>
+                    </div>
+                    
+                    <div class="admin-tab-content active" id="users-tab">
+                        <div class="search-filter-container">
+                            <div class="search-box">
+                                <i class='bx bx-search'></i>
+                                <input type="text" id="searchUsers" placeholder="Suche nach Benutzername oder E-Mail...">
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Benutzername</th>
+                                        <th>E-Mail</th>
+                                        <th>Passwort</th>
+                                        <th>Aktiv seit</th>
+                                        <th>Keys</th>
+                                        <th>Aktionen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <!-- Wird durch JavaScript gefüllt -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-tab-content" id="keys-tab">
+                        <div class="search-filter-container">
+                            <div class="search-box">
+                                <i class='bx bx-search'></i>
+                                <input type="text" id="searchAdminKeys" placeholder="Suche nach Benutzername, E-Mail oder Key...">
+                            </div>
+                            <div class="filter-options">
+                                <select id="adminKeyFilter">
+                                    <option value="all">Alle anzeigen</option>
+                                    <option value="active">Nur aktive</option>
+                                    <option value="expired">Nur abgelaufene</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Benutzername</th>
+                                        <th>E-Mail</th>
+                                        <th>Key</th>
+                                        <th>HWID</th>
+                                        <th>Erstellt am</th>
+                                        <th>Läuft ab</th>
+                                        <th>Status</th>
+                                        <th>Aktionen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminKeysTable">
+                                    <!-- Wird durch JavaScript gefüllt -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+    <script>
+        // API-Konfiguration
+        const API_BASE_URL = 'http://localhost:8000';
+
+        // Zusätzliche Funktionen für die API-Integration
+        async function fetchKeys() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/list_keys`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return data.licenses;
+                } else {
+                    console.error('Fehler beim Laden der Keys:', data.message);
+                    return [];
+                }
+            } catch (error) {
+                console.error('API-Verbindungsfehler:', error);
+                return [];
+            }
+        }
+
+        async function createKey(username, email, key, hwid = "") {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/add_key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        key,
+                        hwid
+                    })
+                });
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Fehler beim Erstellen des Keys:', error);
+                return {
+                    success: false,
+                    message: 'Verbindungsfehler: API nicht erreichbar'
+                };
+            }
+        }
+
+        async function resetKeyHWID(key) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/reset_hwid`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ key })
+                });
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Fehler beim Zurücksetzen der HWID:', error);
+                return {
+                    success: false,
+                    message: 'Verbindungsfehler: API nicht erreichbar'
+                };
+            }
+        }
+
+        async function deleteKey(key) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/delete_key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ key })
+                });
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Fehler beim Löschen des Keys:', error);
+                return {
+                    success: false,
+                    message: 'Verbindungsfehler: API nicht erreichbar'
+                };
+            }
+        }
+
+        // Überschreiben der relevanten Funktionen im Original-Dashboard
+        
+        // Erweiterte Version der renderKeysTable Funktion
+        async function renderKeysTableFromAPI(keysTable) {
+            try {
+                const keys = await fetchKeys();
+                
+                keysTable.innerHTML = '';
+                
+                if (keys.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="7">Keine Keys gefunden</td>`;
+                    keysTable.appendChild(row);
+                    return;
+                }
+                
+                keys.forEach(key => {
+                    const row = document.createElement('tr');
+                    const hasExpiration = false; // API hat noch kein Ablaufdatum implementiert
+                    
+                    row.innerHTML = `
+                        <td>${key.username}</td>
+                        <td>${key.email || '-'}</td>
+                        <td>${key.key}</td>
+                        <td>${key.hwid || 'Nicht registriert'}</td>
+                        <td>${key.created_at || '-'}</td>
+                        <td>Nie</td>
+                        <td>
+                            <button class="action-btn copy-key-btn" data-key="${key.key}">
+                                <i class='bx bx-copy'></i>
+                            </button>
+                            ${key.hwid ? `
+                                <button class="action-btn reset-hwid-btn" data-key="${key.key}">
+                                    <i class='bx bx-reset'></i>
+                                </button>
+                            ` : ''}
+                            <button class="action-btn delete-key-btn" data-key="${key.key}">
+                                <i class='bx bx-trash'></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    keysTable.appendChild(row);
+                });
+                
+                // Event-Listener für Aktionsbuttons
+                document.querySelectorAll('.copy-key-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const keyToCopy = btn.getAttribute('data-key');
+                        navigator.clipboard.writeText(keyToCopy)
+                            .then(() => {
+                                const originalIcon = btn.innerHTML;
+                                btn.innerHTML = '<i class="bx bx-check"></i>';
+                                setTimeout(() => {
+                                    btn.innerHTML = originalIcon;
+                                }, 2000);
+                            })
+                            .catch(err => {
+                                alert('Fehler beim Kopieren: ' + err);
+                            });
+                    });
+                });
+                
+                document.querySelectorAll('.reset-hwid-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const keyToReset = btn.getAttribute('data-key');
+                        if (confirm(`Möchten Sie die HWID für den Key "${keyToReset}" zurücksetzen?`)) {
+                            const result = await resetKeyHWID(keyToReset);
+                            if (result.success) {
+                                alert('HWID erfolgreich zurückgesetzt.');
+                                // Tabelle aktualisieren
+                                renderKeysTableFromAPI(keysTable);
+                            } else {
+                                alert('Fehler beim Zurücksetzen der HWID: ' + result.message);
+                            }
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.delete-key-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const keyToDelete = btn.getAttribute('data-key');
+                        if (confirm(`Möchten Sie den Key "${keyToDelete}" wirklich löschen?`)) {
+                            const result = await deleteKey(keyToDelete);
+                            if (result.success) {
+                                alert('Key erfolgreich gelöscht.');
+                                // Tabelle aktualisieren
+                                renderKeysTableFromAPI(keysTable);
+                            } else {
+                                alert('Fehler beim Löschen des Keys: ' + result.message);
+                            }
+                        }
+                    });
+                });
+                
+                // Zähler aktualisieren
+                if (document.getElementById('keyCount')) {
+                    document.getElementById('keyCount').textContent = keys.length;
+                }
+                
+            } catch (error) {
+                console.error('Fehler beim Rendern der Keys-Tabelle:', error);
+                keysTable.innerHTML = `<tr><td colspan="7">Fehler beim Laden der Daten: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Event-Listener für Key-Generator-Formular überschreiben
+        document.addEventListener('DOMContentLoaded', () => {
+            // Keys laden für verschiedene Tabellen
+            if (document.getElementById('keysTable')) {
+                renderKeysTableFromAPI(document.getElementById('keysTable'));
+            }
+            
+            if (document.getElementById('adminKeysTable')) {
+                renderKeysTableFromAPI(document.getElementById('adminKeysTable'));
+            }
+            
+            if (document.getElementById('recentKeysTable')) {
+                // Nur die neuesten 5 anzeigen
+                renderKeysTableFromAPI(document.getElementById('recentKeysTable')).then(() => {
+                    const rows = document.getElementById('recentKeysTable').querySelectorAll('tr');
+                    if (rows.length > 5) {
+                        for (let i = 5; i < rows.length; i++) {
+                            rows[i].remove();
+                        }
+                    }
+                });
+            }
+            
+            // Key-Generator-Formular
+            const keyGeneratorForm = document.getElementById('keyGeneratorForm');
+            if (keyGeneratorForm) {
+                keyGeneratorForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('username').value;
+                    const validityDays = document.getElementById('validityDays').value;
+                    
+                    // Erzeuge einen zufälligen Key im Format TRG-[username]-XXXX-XXXX
+                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                    let randomPart1 = '';
+                    let randomPart2 = '';
+                    
+                    for (let i = 0; i < 4; i++) {
+                        randomPart1 += chars.charAt(Math.floor(Math.random() * chars.length));
+                        randomPart2 += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    
+                    const key = `TRG-${username.substring(0, 4)}-${randomPart1}-${randomPart2}`;
+                    
+                    const result = await createKey(username, "", key);
+                    
+                    if (result.success) {
+                        document.getElementById('generatedKey').value = key;
+                        document.getElementById('generatedKeyContainer').style.display = 'block';
+                        
+                        // Tabellen aktualisieren
+                        if (document.getElementById('keysTable')) {
+                            renderKeysTableFromAPI(document.getElementById('keysTable'));
+                        }
+                        
+                        if (document.getElementById('adminKeysTable')) {
+                            renderKeysTableFromAPI(document.getElementById('adminKeysTable'));
+                        }
+                        
+                        if (document.getElementById('recentGeneratedKeys')) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${username}</td>
+                                <td>${key}</td>
+                                <td>Nicht registriert</td>
+                                <td>${new Date().toLocaleDateString()}</td>
+                                <td>${validityDays === '-1' ? 'Nie' : `${validityDays} Tage`}</td>
+                                <td>
+                                    <button class="action-btn copy-key-btn" data-key="${key}">
+                                        <i class='bx bx-copy'></i>
+                                    </button>
+                                </td>
+                            `;
+                            document.getElementById('recentGeneratedKeys').appendChild(row);
+                        }
+                    } else {
+                        alert('Fehler beim Erstellen des Keys: ' + result.message);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

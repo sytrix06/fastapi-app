@@ -1,2 +1,14 @@
-fastapi
-uvicorn
+fastapi==0.109.2
+uvicorn==0.27.1
+pydantic==2.6.1
+python-multipart==0.0.9
+requests==2.31.0
+wmi==1.5.1
+psutil==5.9.8
+netifaces==0.11.0
+packaging==23.2
+customtkinter==5.2.2
+numpy==1.26.4
+pyautogui==0.9.54
+keyboard==0.13.5
+python-jose[cryptography]>=3.3.0
