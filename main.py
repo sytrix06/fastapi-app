@@ -6,7 +6,7 @@ import secrets
 import string
 import hashlib
 from typing import List, Dict, Optional, Any
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, HTTPException, Request, Depends, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -128,6 +128,93 @@ async def admin():
 @app.get("/api")
 async def api_root():
     return {"message": "License Key API. See /docs for API documentation."}
+
+# --- ADMIN API ENDPOINTS ---
+
+@app.post("/api/admin/generate_key")
+async def generate_key(data: dict = Body(...)):
+    username = data.get("username")
+    days_valid = int(data.get("days_valid", 30))
+    if not username:
+        raise HTTPException(status_code=400, detail={"message": "Username is required"})
+
+    # Generate key
+    chars = string.ascii_uppercase + string.digits
+    random_part1 = ''.join(secrets.choice(chars) for _ in range(4))
+    random_part2 = ''.join(secrets.choice(chars) for _ in range(4))
+    key = f"TRG-{username[:4]}-{random_part1}-{random_part2}"
+
+    licenses = load_license_data()
+    now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    valid_until = None
+    if days_valid != -1:
+        valid_until = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + days_valid * 86400))
+
+    license_obj = {
+        "username": username,
+        "key": key,
+        "hwid": "",
+        "created_at": now
+    }
+    if valid_until:
+        license_obj["valid_until"] = valid_until
+
+    licenses.append(license_obj)
+    save_license_data(licenses)
+    return {"success": True, "license": license_obj}
+
+@app.get("/api/admin/list_keys")
+async def list_keys():
+    licenses = load_license_data()
+    return {"success": True, "licenses": licenses}
+
+@app.post("/api/admin/add_key")
+async def add_key(data: dict = Body(...)):
+    username = data.get("username")
+    key = data.get("key")
+    hwid = data.get("hwid", "")
+    if not username or not key:
+        raise HTTPException(status_code=400, detail={"message": "Username and key are required"})
+    licenses = load_license_data()
+    now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    license_obj = {
+        "username": username,
+        "key": key,
+        "hwid": hwid,
+        "created_at": now
+    }
+    licenses.append(license_obj)
+    save_license_data(licenses)
+    return {"success": True, "license": license_obj}
+
+@app.post("/api/admin/delete_key")
+async def delete_key(data: dict = Body(...)):
+    key = data.get("key")
+    if not key:
+        raise HTTPException(status_code=400, detail={"message": "Key is required"})
+    licenses = load_license_data()
+    new_licenses = [lic for lic in licenses if lic["key"] != key]
+    if len(new_licenses) == len(licenses):
+        return {"success": False, "message": "Key not found"}
+    save_license_data(new_licenses)
+    return {"success": True}
+
+@app.post("/api/admin/reset_hwid")
+async def reset_hwid(data: dict = Body(...)):
+    key = data.get("key")
+    if not key:
+        raise HTTPException(status_code=400, detail={"message": "Key is required"})
+    licenses = load_license_data()
+    found = False
+    for lic in licenses:
+        if lic["key"] == key:
+            lic["hwid"] = ""
+            lic.pop("hwid_hash", None)
+            found = True
+    if not found:
+        return {"success": False, "message": "Key not found"}
+    save_license_data(licenses)
+    return {"success": True}
 
 if __name__ == "__main__":
     import uvicorn
