@@ -41,7 +41,7 @@ let users = [];
 let keys = [];
 
 // API Configuration
-const API_URL = 'https://fastapi-app.onrender.com';  // Render.com API URL
+const API_URL = 'https://fastapi-app-u6xx.onrender.com';  // Render.com API URL
 
 // Utility Functions
 function showNotification(message, type = 'success') {
