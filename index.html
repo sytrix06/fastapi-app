@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Trigger Key System</title>
+    <link rel="stylesheet" href="login.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        /* Erfolgreicher Button Style */
+        .btn-success {
+            background-color: #4CAF50 !important; /* Grün */
+            color: white !important;
+        }
+        
+        /* HWID Anzeige */
+        .hwid-display {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #555;
+            text-align: center;
+        }
+        
+        /* Zusätzliche Tab für License Key Login */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid #5995fd;
+            color: #5995fd;
+            font-weight: bold;
+        }
+        
+        .form-box {
+            display: none;
+        }
+        
+        .form-box.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="form-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="account">Account Login</div>
+                <div class="tab" data-tab="license">License Key</div>
+            </div>
+            
+            <!-- Account Login Form -->
+            <div class="form-box login active" id="accountLogin">
+                <form id="loginForm">
+                    <h1>Anmelden</h1>
+                    <div class="input-box">
+                        <input type="text" id="loginUsername" placeholder="Username" required>
+                        <i class='bx bxs-user'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="password" id="loginPassword" placeholder="Passwort" required>
+                        <i class='bx bxs-lock-alt'></i>
+                    </div>
+                    <div class="forgot-link">
+                        <a href="#" id="forgotPassword">Passwort vergessen?</a>
+                    </div>
+                    <button type="submit" class="btn">Anmelden</button>
+                    <p>Noch kein Konto? Registriere dich für den Zugriff auf das Trigger Key System.</p>
+                </form>
+            </div>
+            
+            <!-- License Key Login Form -->
+            <div class="form-box license" id="licenseLogin">
+                <form id="licenseForm">
+                    <h1>Mit Lizenzschlüssel anmelden</h1>
+                    <div class="input-box">
+                        <input type="text" id="licenseUsername" placeholder="Username" required>
+                        <i class='bx bxs-user'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="licenseKey" placeholder="Lizenzschlüssel" required>
+                        <i class='bx bxs-key'></i>
+                    </div>
+                    <div class="hwid-display" id="hwidDisplay">
+                        HWID: Wird generiert...
+                    </div>
+                    <button type="submit" class="btn" id="verifyBtn">Verify & Start</button>
+                    <p>Gib deinen Benutzernamen und Lizenzschlüssel ein, um den Trigger zu starten.</p>
+                </form>
+            </div>
+        </div>
+
+        <div class="form-box register">
+            <form id="registerForm">
+                <h1>Registrierung</h1>
+                <div class="input-box">
+                    <input type="text" id="registerUsername" placeholder="Username" required>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box">
+                    <input type="email" id="registerEmail" placeholder="E-Mail" required>
+                    <i class='bx bxs-envelope'></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="registerPassword" placeholder="Passwort" required>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <button type="submit" class="btn" id="registerBtn">Registrieren</button>
+                <p>Registriere dich, um Zugriff auf das Trigger Key System zu erhalten und Keys zu generieren.</p>
+            </form>
+        </div>
+
+        <div class="toggle-box">
+            <div class="toggle-panel toggle-left">
+                <h1>Hallo, Willkommen!</h1>
+                <p>Noch kein Konto?</p>
+                <button class="btn register-btn">Registrieren</button>
+            </div>
+
+            <div class="toggle-panel toggle-right">
+                <h1>Willkommen zurück!</h1>
+                <p>Bereits ein Konto?</p>
+                <button class="btn login-btn">Anmelden</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js";
+        import { 
+            getAuth, 
+            GoogleAuthProvider, 
+            FacebookAuthProvider,
+            GithubAuthProvider,
+            signInWithPopup, 
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+        import { getFirestore, collection, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyB0RB2EyakIdawusktpfNq7xx0-fCwqDyQ",
+          authDomain: "scheel-bau-gmbh.firebaseapp.com",
+          projectId: "scheel-bau-gmbh",
+          storageBucket: "scheel-bau-gmbh.firebasestorage.app",
+          messagingSenderId: "616089735566",
+          appId: "1:616089735566:web:82f3461685cc2d3f3c94df",
+          measurementId: "G-51HZTXYWH6"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Globale Variablen
+        const container = document.getElementById('container');
+        const loginBtn = document.querySelector('.login-btn');
+        const registerBtn = document.querySelector('.register-btn');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const registerButton = document.getElementById('registerBtn');
+        
+        // Login mit Email und Passwort
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert("Bitte geben Sie E-Mail und Passwort ein.");
+                return;
+            }
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // Weiterleitung zur Hauptseite
+                window.location.href = "index.html";
+            } catch (error) {
+                let errorMessage = "Fehler beim Login: ";
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = "Dieser Benutzer existiert nicht. Bitte überprüfen Sie Ihre E-Mail-Adresse oder registrieren Sie sich.";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = "Falsches Passwort. Bitte versuchen Sie es erneut.";
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage = "Ungültige Anmeldedaten. Bitte überprüfen Sie Ihre E-Mail und Ihr Passwort.";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = "Zu viele fehlgeschlagene Anmeldeversuche. Bitte versuchen Sie es später erneut oder setzen Sie Ihr Passwort zurück.";
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                
+                alert(errorMessage);
+            }
+        });
+        
+        // Registrierung mit Email und Passwort
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                // Versuche den Benutzer zu registrieren
+                await createUserWithEmailAndPassword(auth, email, password);
+                
+                // Erfolg! Button grün machen und Text ändern
+                registerButton.textContent = "Erfolgreich";
+                registerButton.classList.add('btn-success');
+                registerButton.disabled = true;
+                
+                // E-Mail für Login speichern
+                const registeredEmail = email;
+                
+                // Nach 1.5 Sekunden zurücksetzen und zum Login wechseln
+                setTimeout(() => {
+                    // Formular zurücksetzen
+                    registerForm.reset();
+                    
+                    // Button zurücksetzen
+                    registerButton.textContent = "Registrieren";
+                    registerButton.classList.remove('btn-success');
+                    registerButton.disabled = false;
+                    
+                    // Zur Login-Ansicht wechseln und E-Mail übertragen
+                    document.getElementById('loginEmail').value = registeredEmail;
+                    container.classList.remove('active');
+                }, 1500);
+                
+            } catch (error) {
+                // Bei Email-already-in-use spezifische Meldung
+                if (error.code === 'auth/email-already-in-use') {
+                    alert("Diese E-Mail-Adresse wird bereits verwendet.");
+                } else {
+                    // Alle anderen Fehler
+                    alert("Fehler bei der Registrierung: " + error.message);
+                }
+            }
+        });
+        
+        // Passwort zurücksetzen
+        document.getElementById('forgotPassword').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = prompt("Bitte geben Sie Ihre E-Mail-Adresse ein:");
+            
+            if (email) {
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    alert("Passwort-Reset-Link wurde an Ihre E-Mail gesendet.");
+                } catch (error) {
+                    alert("Fehler beim Zurücksetzen des Passworts: " + error.message);
+                }
+            }
+        });
+        
+        // Social Login Funktionen
+        // Google Login
+        document.getElementById('googleLogin').addEventListener('click', loginWithGoogle);
+        document.getElementById('googleRegister').addEventListener('click', loginWithGoogle);
+        
+        function loginWithGoogle() {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(async (result) => {
+                    const user = result.user;
+                    
+                    // Benutzer in Firestore speichern, falls er noch nicht existiert
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: user.email,
+                        createdAt: new Date().toISOString()
+                    }, { merge: true });
+                    
+                    alert("Eingeloggt mit Google: " + user.email);
+                    window.location.href = "index.html";
+                })
+                .catch(error => alert("Google Login Fehler: " + error.message));
+        }
+        
+        // Facebook Login
+        document.getElementById('facebookLogin').addEventListener('click', loginWithFacebook);
+        document.getElementById('facebookRegister').addEventListener('click', loginWithFacebook);
+        
+        function loginWithFacebook() {
+            const provider = new FacebookAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(async (result) => {
+                    const user = result.user;
+                    
+                    // Benutzer in Firestore speichern
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: user.email,
+                        createdAt: new Date().toISOString()
+                    }, { merge: true });
+                    
+                    alert("Eingeloggt mit Facebook: " + user.email);
+                    window.location.href = "index.html";
+                })
+                .catch(error => alert("Facebook Login Fehler: " + error.message));
+        }
+        
+        // GitHub Login
+        document.getElementById('githubLogin').addEventListener('click', loginWithGithub);
+        document.getElementById('githubRegister').addEventListener('click', loginWithGithub);
+        
+        function loginWithGithub() {
+            const provider = new GithubAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(async (result) => {
+                    const user = result.user;
+                    
+                    // Benutzer in Firestore speichern
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: user.email,
+                        createdAt: new Date().toISOString()
+                    }, { merge: true });
+                    
+                    alert("Eingeloggt mit GitHub: " + user.email);
+                    window.location.href = "index.html";
+                })
+                .catch(error => alert("GitHub Login Fehler: " + error.message));
+        }
+        
+        // Überprüfe, ob der Benutzer bereits angemeldet ist
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Benutzer ist angemeldet - hier könnte man direkt zur Hauptseite weiterleiten
+                // window.location.href = "index.html";
+            }
+        });
+        
+        // Wechsel zwischen Login und Registrierung
+        loginBtn.addEventListener('click', () => {
+            container.classList.remove('active');
+        });
+        
+        registerBtn.addEventListener('click', () => {
+            container.classList.add('active');
+        });
+    </script>
+    <script>
+        // API-Konfiguration
+        const API_BASE_URL = 'http://localhost:8000';
+        
+        // HWID Generierung
+        function generateHWID() {
+            // Hier generieren wir eine einfache HWID basierend auf Browser- und Geräteinformationen
+            // In einer echten Anwendung würde man Hardware-Informationen verwenden
+            const platform = navigator.platform;
+            const userAgent = navigator.userAgent;
+            const screenWidth = window.screen.width;
+            const screenHeight = window.screen.height;
+            const colorDepth = window.screen.colorDepth;
+            
+            // Kombinieren und Hashen der Informationen
+            const rawHWID = platform + userAgent + screenWidth + screenHeight + colorDepth;
+            let hwid = "";
+            
+            // Einfache Hash-Funktion
+            for (let i = 0; i < rawHWID.length; i++) {
+                hwid += rawHWID.charCodeAt(i).toString(16);
+            }
+            
+            // Auf 16 Zeichen kürzen
+            return hwid.substring(0, 16).toUpperCase();
+        }
+        
+        // Lizenzschlüssel verifizieren
+        async function verifyLicense(username, key, hwid) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, key, hwid })
+                });
+                
+                if (response.status === 200) {
+                    return await response.json();
+                } else {
+                    const errorData = await response.json();
+                    return {
+                        success: false,
+                        message: errorData.detail ? errorData.detail.message : 'Fehler bei der Verifizierung'
+                    };
+                }
+            } catch (error) {
+                console.error('API-Verbindungsfehler:', error);
+                return {
+                    success: false,
+                    message: 'Verbindungsfehler: API nicht erreichbar'
+                };
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab-Funktionalität
+            const tabs = document.querySelectorAll('.tab');
+            const formBoxes = document.querySelectorAll('.form-box');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    
+                    // Tabs aktualisieren
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Forms aktualisieren
+                    if (target === 'account') {
+                        document.getElementById('accountLogin').classList.add('active');
+                        document.getElementById('licenseLogin').classList.remove('active');
+                    } else {
+                        document.getElementById('accountLogin').classList.remove('active');
+                        document.getElementById('licenseLogin').classList.add('active');
+                    }
+                });
+            });
+            
+            // HWID generieren und anzeigen
+            const hwid = generateHWID();
+            document.getElementById('hwidDisplay').textContent = `HWID: ${hwid.substring(0, 4)}...${hwid.substring(12)}`;
+            
+            // License Key Formular
+            const licenseForm = document.getElementById('licenseForm');
+            const verifyBtn = document.getElementById('verifyBtn');
+            
+            licenseForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('licenseUsername').value;
+                const licenseKey = document.getElementById('licenseKey').value;
+                
+                // Button Status aktualisieren
+                verifyBtn.textContent = 'Verifiziere...';
+                verifyBtn.disabled = true;
+                
+                // API-Anfrage für Schlüsselüberprüfung
+                const result = await verifyLicense(username, licenseKey, hwid);
+                
+                if (result.success) {
+                    // Erfolgreiche Verifizierung
+                    verifyBtn.textContent = 'Erfolgreich';
+                    verifyBtn.classList.add('btn-success');
+                    
+                    // Benutzerinformationen speichern
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        username: username,
+                        key: licenseKey,
+                        hwid: hwid
+                    }));
+                    
+                    // Nach kurzer Verzögerung zum Dashboard weiterleiten
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    // Fehlgeschlagene Verifizierung
+                    alert('Fehler: ' + result.message);
+                    verifyBtn.textContent = 'Verify & Start';
+                    verifyBtn.disabled = false;
+                }
+            });
+            
+            // Standard-Login-Formular-Verhalten beibehalten
+            const container = document.getElementById('container');
+            const loginBtn = document.querySelector('.login-btn');
+            const registerBtn = document.querySelector('.register-btn');
+            
+            registerBtn.addEventListener('click', () => {
+                container.classList.add('active');
+            });
+            
+            loginBtn.addEventListener('click', () => {
+                container.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html> 
